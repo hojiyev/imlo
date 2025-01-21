@@ -1,38 +1,40 @@
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, filters, CallbackContext
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters
 import pandas as pd
-from difflib import get_close_matches
 
-# Lug'atni yuklash
-data = pd.read_csv("lugat.csv")  # Lug'at ma'lumotlari
+# Lug‘atni yuklash
+try:
+    data = pd.read_csv("lugat.csv", encoding="utf-8")
+except FileNotFoundError:
+    data = None
+    print("Lug‘at fayli topilmadi. Iltimos, lugat.csv faylini loyihaga joylashtiring.")
 
-# So'z qidirish funksiyasi
+# So‘z qidirish funksiyasi
 def find_word(word):
-    if word in data["so'z"].values:
+    if data is not None and word in data["so'z"].values:
         return f"'{word}' lug‘atda mavjud."
     else:
-        # O'xshash so'zlarni taklif qilish
-        suggestions = get_close_matches(word, data["so'z"].values, n=3, cutoff=0.6)
-        if suggestions:
-            return f"'{word}' topilmadi. Sizning so'zingizga yaqin variantlar: {', '.join(suggestions)}"
-        else:
-            return f"'{word}' lug‘atda topilmadi."
+        return f"'{word}' lug‘atda topilmadi."
 
-# Bot funksiyalari
-def start(update: Update, context: CallbackContext):
-    update.message.reply_text("Assalomu alaykum! So'z kiriting va men uning to'g'ri variantini topaman.")
+# /start komandasi
+def start(update, context):
+    update.message.reply_text("Assalomu alaykum! So‘z kiriting va men uning to‘g‘ri variantini topaman.")
 
-def handle_message(update: Update, context: CallbackContext):
+# Xabarlarni qayta ishlash
+def handle_message(update, context):
     user_input = update.message.text.strip()
     response = find_word(user_input)
     update.message.reply_text(response)
 
-# Botni ishga tushirish
+# Asosiy funksiya
 def main():
-    updater = Updater("1916436179:AAGH0Jxf7E78D0N_bvmXBpUEghJeLvoI4h4", use_context=True)
+    # Telegram bot tokeningizni shu yerga kiriting
+    updater = Updater("1916436179:AAGH0Jxf7E78D0N_bvmXBpUEghJeLvoI4h4")
+
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(MessageHandler(filters.text & ~filters.command, handle_message))
+    dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    # Botni ishga tushirish
     updater.start_polling()
     updater.idle()
 
