@@ -1,4 +1,4 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, filters
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 import pandas as pd
 
 # Lug‘atni yuklash
@@ -16,27 +16,26 @@ def find_word(word):
         return f"'{word}' lug‘atda topilmadi."
 
 # /start komandasi
-def start(update, context):
-    update.message.reply_text("Assalomu alaykum! So‘z kiriting va men uning to‘g‘ri variantini topaman.")
+async def start(update, context):
+    await update.message.reply_text("Assalomu alaykum! So‘z kiriting va men uning to‘g‘ri variantini topaman.")
 
 # Xabarlarni qayta ishlash
-def handle_message(update, context):
+async def handle_message(update, context):
     user_input = update.message.text.strip()
     response = find_word(user_input)
-    update.message.reply_text(response)
+    await update.message.reply_text(response)
 
 # Asosiy funksiya
 def main():
     # Telegram bot tokeningizni shu yerga kiriting
-    updater = Updater("1916436179:AAGH0Jxf7E78D0N_bvmXBpUEghJeLvoI4h4")
+    application = Application.builder().token("1916436179:AAGH0Jxf7E78D0N_bvmXBpUEghJeLvoI4h4").build()
 
-    dispatcher = updater.dispatcher
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    # Komandalar va xabarlarni qo‘shish
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     # Botni ishga tushirish
-    updater.start_polling()
-    updater.idle()
+    application.run_polling()
 
 if __name__ == "__main__":
     main()
