@@ -10,7 +10,7 @@ except FileNotFoundError:
 
 # So‘z qidirish funksiyasi
 def find_word(word):
-    if data is not None and word in data["so'z"].values:
+    if data is not None and word in data["So'z"].values:
         return f"'{word}' lug‘atda mavjud."
     else:
         return f"'{word}' lug‘atda topilmadi."
